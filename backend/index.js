@@ -23,3 +23,4 @@ mongoose.connect(
 
 // setup routes
 app.use('/users', require('./routes/userRouter'));
+app.use('/pomodoros', require('./routes/pomodoroRouter'));
