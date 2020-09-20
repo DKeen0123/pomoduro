@@ -3,6 +3,7 @@ const User = require('../models/userModel');
 const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const userModel = require('../models/userModel');
 
 router.post('/signup', async (req, res) => {
   try {
@@ -79,7 +80,6 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         displayName: user.displayName,
-        email: user.email,
       },
     });
   } catch (err) {
@@ -104,10 +104,22 @@ router.post('/tokenIsValid', async (req, res) => {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     if (!verified) return res.json(false);
 
-    const user = await User.findByIdAndDelete(verified.id);
+    const user = await User.findById(verified.id);
     if (!user) return false;
 
     return res.json(true);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/', auth, async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user);
+    res.json({
+      displayName: user.displayName,
+      id: user._id,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
