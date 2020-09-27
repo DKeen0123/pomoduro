@@ -1,18 +1,47 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
 const Pomodoro = require('../models/pomodoroModel');
+const Project = require('../models/projectModel');
+const defaultProjectName = 'unspecified';
 
 router.post('/', auth, async (req, res) => {
   try {
-    const { lengthInSeconds } = req.body;
+    const { lengthInSeconds, projectName } = req.body;
 
     if (!lengthInSeconds) {
       return res.status(400).json({ msg: 'no length was given' });
     }
 
+    let projectId;
+    let project = await Project.findOne({
+      name: projectName,
+      userId: req.user,
+    });
+
+    if (!project) {
+      project = await Project.findOne({
+        name: defaultProjectName,
+        userId: req.user,
+      });
+      projectId = project._id;
+
+      if (!project) {
+        const newProject = new Project({
+          name: defaultProjectName,
+          userId: req.user,
+        });
+
+        const savedProject = await newProject.save();
+        projectId = savedProject._id;
+      }
+    } else {
+      projectId = project._id;
+    }
+
     const newPomodoro = new Pomodoro({
       lengthInSeconds,
       userId: req.user,
+      projectId,
     });
 
     const savedPomodoro = await newPomodoro.save();
