@@ -7,7 +7,6 @@ const defaultProjectName = 'unspecified';
 router.post('/', auth, async (req, res) => {
   try {
     const { lengthInSeconds, projectName } = req.body;
-
     if (!lengthInSeconds) {
       return res.status(400).json({ msg: 'no length was given' });
     }
@@ -23,7 +22,6 @@ router.post('/', auth, async (req, res) => {
         name: defaultProjectName,
         userId: req.user,
       });
-      projectId = project._id;
 
       if (!project) {
         const newProject = new Project({
@@ -33,6 +31,8 @@ router.post('/', auth, async (req, res) => {
 
         const savedProject = await newProject.save();
         projectId = savedProject._id;
+      } else {
+        projectId = project._id;
       }
     } else {
       projectId = project._id;

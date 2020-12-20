@@ -4,7 +4,7 @@ const Project = require('../models/projectModel');
 
 router.post('/', auth, async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, complete } = req.body;
 
     if (!name) {
       return res.status(400).json({ msg: 'no name was given' });
@@ -13,6 +13,7 @@ router.post('/', auth, async (req, res) => {
     const newProject = new Project({
       name,
       userId: req.user,
+      complete: !complete,
     });
 
     const savedProject = await newProject.save();
